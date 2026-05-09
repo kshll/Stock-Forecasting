@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, BarChart2, TrendingUp, Activity } from 'lucide-react';
+import { BarChart2, TrendingUp, Activity } from 'lucide-react';
 import { Line } from 'react-chartjs-2';
 import { StockData } from '../types';
 

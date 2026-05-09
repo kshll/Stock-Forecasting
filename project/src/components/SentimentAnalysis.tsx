@@ -111,7 +111,7 @@ const SentimentAnalysis: React.FC<SentimentAnalysisProps> = ({ symbol }) => {
     
     const totalScore = newsData.reduce((sum, news) => {
       // Convert to -1 to 1 scale
-      let normalizedScore = news.sentiment === 'negative' 
+      const normalizedScore = news.sentiment === 'negative' 
         ? -1 * news.score 
         : news.sentiment === 'positive' 
           ? news.score 

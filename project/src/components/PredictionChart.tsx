@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Chart } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { StockData, PredictionData } from '../types';
 import LoadingSpinner from './LoadingSpinner';
@@ -10,12 +9,17 @@ interface PredictionChartProps {
   symbol: string;
 }
 
+interface ChartDataConfig {
+  labels: (Date | null)[];
+  datasets: Record<string, unknown>[];
+}
+
 const PredictionChart: React.FC<PredictionChartProps> = ({ 
   historicalData, 
   predictions,
   symbol
 }) => {
-  const [chartData, setChartData] = useState<any>(null);
+  const [chartData, setChartData] = useState<ChartDataConfig | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [accuracy, setAccuracy] = useState<number | null>(null);
   const [trainButtonDisabled, setTrainButtonDisabled] = useState(false);
@@ -38,7 +42,7 @@ const PredictionChart: React.FC<PredictionChartProps> = ({
     const confidenceUpper = predictions.map(p => p.value + p.confidence);
     const confidenceLower = predictions.map(p => p.value - p.confidence);
     
-    const chartDataConfig = {
+    const chartDataConfig: ChartDataConfig = {
       labels: [...historicalDates, ...predictionDates],
       datasets: [
         {
@@ -136,8 +140,8 @@ const PredictionChart: React.FC<PredictionChartProps> = ({
           color: 'rgba(226, 232, 240, 0.5)',
         },
         ticks: {
-          callback: (value: any) => {
-            return '$' + value.toFixed(2);
+          callback: (value: string | number) => {
+            return '$' + Number(value).toFixed(2);
           },
         },
       },
@@ -149,7 +153,7 @@ const PredictionChart: React.FC<PredictionChartProps> = ({
       },
       tooltip: {
         callbacks: {
-          label: (context: any) => {
+          label: (context: { dataset: { label?: string }; parsed: { y: number } }) => {
             const label = context.dataset.label || '';
             if (label === 'Upper Bound' || label === 'Lower Bound') {
               return label + ': $' + context.parsed.y.toFixed(2);

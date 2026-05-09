@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Chart, registerables } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import 'chartjs-adapter-date-fns';
@@ -12,12 +12,16 @@ interface StockChartProps {
   symbol: string;
 }
 
+interface ChartDataConfig {
+  labels: Date[];
+  datasets: Record<string, unknown>[];
+}
+
 const StockChart: React.FC<StockChartProps> = ({ data, symbol }) => {
-  const [chartData, setChartData] = useState<any>(null);
+  const [chartData, setChartData] = useState<ChartDataConfig | null>(null);
   const [showVolume, setShowVolume] = useState(true);
   const [showMA50, setShowMA50] = useState(true);
   const [showMA200, setShowMA200] = useState(true);
-  const chartRef = useRef<Chart | null>(null);
 
   useEffect(() => {
     if (!data || data.length === 0) return;
@@ -26,7 +30,7 @@ const StockChart: React.FC<StockChartProps> = ({ data, symbol }) => {
     const ma50Data = calculateMovingAverage(data, 50);
     const ma200Data = calculateMovingAverage(data, 200);
 
-    const chartDataConfig = {
+    const chartDataConfig: ChartDataConfig = {
       labels: data.map(item => new Date(item.date)),
       datasets: [
         {
@@ -117,8 +121,8 @@ const StockChart: React.FC<StockChartProps> = ({ data, symbol }) => {
           color: 'rgba(226, 232, 240, 0.5)',
         },
         ticks: {
-          callback: (value: any) => {
-            return '$' + value.toFixed(2);
+          callback: (value: string | number) => {
+            return '$' + Number(value).toFixed(2);
           },
         },
       },
@@ -128,10 +132,11 @@ const StockChart: React.FC<StockChartProps> = ({ data, symbol }) => {
           drawOnChartArea: false,
         },
         ticks: {
-          callback: (value: any) => {
-            if (value >= 1_000_000) return (value / 1_000_000).toFixed(1) + 'M';
-            if (value >= 1_000) return (value / 1_000).toFixed(1) + 'K';
-            return value;
+          callback: (value: string | number) => {
+            const numValue = Number(value);
+            if (numValue >= 1_000_000) return (numValue / 1_000_000).toFixed(1) + 'M';
+            if (numValue >= 1_000) return (numValue / 1_000).toFixed(1) + 'K';
+            return String(numValue);
           },
         },
         display: showVolume,
@@ -143,10 +148,10 @@ const StockChart: React.FC<StockChartProps> = ({ data, symbol }) => {
       },
       tooltip: {
         callbacks: {
-          label: (context: any) => {
+          label: (context: { dataset: { label?: string }; parsed: { y: number } }) => {
             const label = context.dataset.label || '';
             if (label === 'Volume') {
-              let value = context.parsed.y;
+              const value = context.parsed.y;
               if (value >= 1_000_000) return label + ': ' + (value / 1_000_000).toFixed(2) + 'M';
               if (value >= 1_000) return label + ': ' + (value / 1_000).toFixed(2) + 'K';
               return label + ': ' + value;

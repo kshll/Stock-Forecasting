@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { CalendarRange, Clock, TrendingUp, TrendingDown, Activity, Layers, BarChart2 } from 'lucide-react';
+import { Clock, TrendingUp, TrendingDown, Activity, Layers, BarChart2 } from 'lucide-react';
 import StockChart from './StockChart';
 import StockSelector from './StockSelector';
 import DateRangeSelector from './DateRangeSelector';
