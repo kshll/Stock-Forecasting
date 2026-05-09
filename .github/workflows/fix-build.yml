@@ -1,0 +1,63 @@
+name: Apply Fix
+
+on:
+  workflow_dispatch
+
+jobs:
+  apply-fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Update workflow file
+        run: |
+          cat > .github/workflows/webpack.yml << 'EOF'
+          name: Build and Test
+
+          on:
+            push:
+              branches: [ "main" ]
+            pull_request:
+              branches: [ "main" ]
+
+          jobs:
+            build:
+              runs-on: ubuntu-latest
+
+              strategy:
+                matrix:
+                  node-version: [18.x, 20.x, 22.x]
+
+              steps:
+              - uses: actions/checkout@v4
+
+              - name: Use Node.js ${{ matrix.node-version }}
+                uses: actions/setup-node@v4
+                with:
+                  node-version: ${{ matrix.node-version }}
+                  cache: 'npm'
+                  cache-dependency-path: 'project/package-lock.json'
+
+              - name: Install dependencies
+                run: |
+                  cd project
+                  npm install
+
+              - name: Build with Vite
+                run: |
+                  cd project
+                  npm run build
+
+              - name: Lint
+                run: |
+                  cd project
+                  npm run lint
+          EOF
+      
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .github/workflows/webpack.yml
+          git commit -m "Fix: Update workflow to use Vite instead of Webpack"
+          git push
