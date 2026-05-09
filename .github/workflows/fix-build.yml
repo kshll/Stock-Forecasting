@@ -3,6 +3,9 @@ name: Apply Fix
 on:
   workflow_dispatch
 
+permissions:
+  contents: write
+
 jobs:
   apply-fix:
     runs-on: ubuntu-latest
